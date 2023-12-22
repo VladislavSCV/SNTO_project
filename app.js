@@ -1,12 +1,23 @@
-const http = require('http'); // либа для работы с http запросами
-const fs = require('fs'); // либа для работы с файлами
+const express = require('express')
+const fs = require('fs')
 
-let server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    const stream = fs.createReadStream('templates/index.html')
-    stream.pipe(res)
+const app = express()
+
+app.use(function(req, res, next) {
+    const date = new Date()
+    fs.appendFile('Server logs.txt', `Server logs: ${date.getHours()} : ${date.getMinutes()} : ${date.getSeconds()} : ${req.ip} : ${req.port}, ${req.url} \n`, (err) => {
+        if (err) throw err;
+        console.log('Logs appended to file.');
+      })
+      next();
+});
+
+
+app.get('/', function(req, res){
+    res.sendFile(__dirname + '/templates/index.html')
 })
 
-server.listen(8000, "127.0.0.1", () => {
-    console.log("server is running")
+
+app.listen(8000, function(){
+    console.log('Listening on port 8000')
 })
